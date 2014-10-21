@@ -1,0 +1,99 @@
+<html>
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+text {
+  font: 10px sans-serif;
+}
+
+</style>
+<body>
+  <div id="techBubble">
+  </div>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+d3.json("bubble_data.json", function( error, bubbleData ) {
+  if ( error ){
+      alert("Problem loading bubbles. Please check browser console for error.");
+      console.error(error);
+      return;
+  }
+
+  var diameter = 660,
+      format = d3.format(",d"),
+      color = d3.scale.category20c();
+
+  var bubble = d3.layout.pack()
+      .sort(null)
+      .size([diameter, diameter])
+      .padding(1.5);
+
+  var svg = d3.select("#techBubble").append("svg")
+      .attr("width", diameter)
+      .attr("height", diameter)
+      .attr("class", "bubble");
+
+  var node = svg.selectAll(".node")
+      .data(bubble.nodes(classes(bubbleData))
+      .filter(function(d) { return !d.children; }))
+      .enter().append("g")
+        .attr("class", "node")
+        .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+  node.append("title")
+      .text(function(d) { return d.className + ": " + format(d.value); });
+
+  node.append("circle")
+      .attr("r", function(d) { return d.r; })
+      .style("fill", function(d) { return color(d.packageName); })
+      .style("opacity", function(d) { return ".7"; })
+      .on("mouseover", function(){
+          d3.select(this)
+  					.transition()
+            .style("opacity", function(d) { 
+                return "1";
+            })
+            .style("stroke", "black")
+            .style("stroke-width", 5)
+            .attr("r", function(d) { return d.r * 1.5 ; });
+       })
+      .on("mouseout", function(){
+          d3.select(this)
+  					.transition()
+            .style("opacity", function(d){ return ".7"; })
+            .attr("r", function(d) { return d.r ; });
+       });
+
+  node.append("text")
+      .attr("dy", ".3em")
+      .style("text-anchor", "middle")
+      .text(function(d) { return d.className.substring(0, d.r / 3); });
+
+  node.on("click", function(d){
+    if (d.url){
+      window.open(d.url, "_blank");
+    } 
+    else {
+      alert(d.className);
+    }
+  });
+
+  d3.select(self.frameElement).style("height", diameter + "px");
+});
+
+// Returns a flattened hierarchy containing all leaf nodes under the root.
+function classes(root) {
+  var classes = [];
+
+  function recurse(name, node) {
+    if (node.children) node.children.forEach(function(child) { recurse(node.name, child); });
+    else classes.push({packageName: name, className: node.name, value: node.size, url: node.url});
+  }
+
+  recurse(null, root);
+  return {children: classes};
+}
+
+</script>

@@ -1,0 +1,160 @@
+<html>
+<!DOCTYPE html>
+<meta charset="utf-8">
+<style>
+
+text {
+  font: 10px sans-serif;
+}
+
+</style>
+<body>
+  <div id="techBubble">
+  </div>
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script>
+
+var bubbleData = {
+ "name": "Tech Bubble",
+ "children": [
+  {
+   "name": "Windows Services",
+   "children": [
+      {
+        "name": "dotNet",
+        "children": [
+          { "name": "dotNet", "children": [
+            { "name": "C Sharp","size": 100, "url": "http://channel9.msdn.com/Series/C-Sharp-Fundamentals-Development-for-Absolute-Beginners"},
+            { "name": "Enterprise Library", "size": 100, "children": [
+              {"name": "Semantic Logging", "size": 100, "url": "http://msdn.microsoft.com/en-au/library/ff648951.aspx"}
+            ]},
+            { "name": "Asynchronous Programming","size": 75, "url": "http://msdn.microsoft.com/en-us/library/hh191443.aspx"},
+            { "name": "Asp.net Web API","size": 150, "url": "www.asp.net/web-api" },
+            { "name": "NuGet Package Management","size": 50, "url": "https://www.nuget.org"},
+            { "name": "Entity Framework","size": 150, "url": "http://msdn.microsoft.com/en-au/data/ef.aspx"},
+            { "name": "Slow Cheetah", "size": 80, "url":  "https://visualstudiogallery.msdn.microsoft.com/69023d00-a4f9-4a34-a6cd-7e854ba318b5"},
+            { "name": "Quartz.NET","size": 100 , "url": "www.quartz-scheduler.net"}
+          ]},
+          { "name": "Rabbit MQ","size": 100, "url": "http://www.rabbitmq.com"},
+          { "name": "Cloud", "children": [
+            { "name": "Amazon EC2","size": 150, "url": "http://aws.amazon.com/ec2" },
+            { "name": "Amazon S3","size": 100, "url": "http://aws.amazon.com/s3" }
+          ]},
+          { "name": "Client Side Technologies", "children": [
+              { "name": "Kibana", "size": 100, "url": "http://www.elasticsearch.org/overview/kibana"},
+              { "name": "Angular JS","size": 100, "url": "http://angularjs.org" },
+              {"name": "Bootstrap JS", "size": 50, "url": "http://getbootstrap.com/javascript"},
+              {"name": "Leaflet", "size": 50, "url": "http://leafletjs.com"},
+              {"name": "SASS", "size": 50, "url": "http://sass-lang.com"}, 
+              {"name": "Toastr", "size": 15, "url": "https://github.com/CodeSeven/toastr"}, 
+              {"name": "Build Framework and Dependancy Management", "children": [
+                {"name": "Grunt", "size": 50, "url": "http://gruntjs.com"},
+                {"name": "Bower", "size": 50, "url": "http://bower.io"},
+                {"name": "npm", "size": 50, "url": "http://www.npmjs.org"}
+              ]}
+          ]},
+          { "name": "Elastic Search","size": 200, "url": "http://www.elasticsearch.org"},
+          { "name": "Apache Camel","size": 50, "url": "http://camel.apache.org" },
+          { "name": "CartoDB","size": 150, "url": "https://geoplex.cartodb.com" },
+          { "name": "PostgreSQL","size": 200, "url": "http://www.postgresql.org" },
+          { "name": "PostGIS","size": 50, "url": "http://postgis.net" },
+          { "name": "CI, Monitoring and DevOps", 
+            "children": [
+              {"name": "Puppet","size": 50, "url": "http://puppetlabs.com/puppet/what-is-puppet"},
+              {"name": "Icinga","size": 50, "url": "https://www.icinga.org/"},
+              {"name": "Munin","size": 50, "url": "http://munin-monitoring.org"},
+              {"name": "Jenkins","size": 50, "url": "http://jenkins-ci.org"},
+              {"name": "CrystalQuartz", "size": 20, "url": "http://code.google.com/p/crystal-quartz/"},
+              {"name": "Elastic Search Plugins", "children": [
+                {"name": "Head","size": 50, "url": "http://mobz.github.io/elasticsearch-head/"}
+              ]}
+            ]
+          },
+          { "name": "Languages", "children": [
+              {"name": "dot Net","size": 100},
+              {"name": "JavaScript","size": 100},
+              {"name": "SASS","size": 50},
+              {"name": "Java","size": 30},
+              {"name": "Ruby","size": 30},
+              {"name": "Bash","size": 30}
+          ]}
+        ]
+      }
+   ]
+  }
+ ]
+};
+
+
+var diameter = 660,
+    format = d3.format(",d"),
+    color = d3.scale.category20c();
+
+var bubble = d3.layout.pack()
+    .sort(null)
+    .size([diameter, diameter])
+    .padding(1.5);
+
+var svg = d3.select("#techBubble").append("svg")
+    .attr("width", diameter)
+    .attr("height", diameter)
+    .attr("class", "bubble");
+
+var node = svg.selectAll(".node")
+    .data(bubble.nodes(classes(bubbleData))
+    .filter(function(d) { return !d.children; }))
+  .enter().append("g")
+    .attr("class", "node")
+    .attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+node.append("title")
+    .text(function(d) { return d.className + ": " + format(d.value); });
+
+node.append("circle")
+    .attr("r", function(d) { return d.r; })
+    .style("fill", function(d) { return color(d.packageName); })
+    .style("opacity", function(d) { return ".7"; })
+    .on("mouseover", function(){
+        d3.select(this)
+					.transition()
+          .style("opacity", function(d) { 
+              return "1";
+          })
+          .attr("r", function(d) { return d.r * 1.5 ; });
+     })
+    .on("mouseout", function(){
+        d3.select(this)
+					.transition()
+          .style("opacity", function(d){ return ".7"; })
+          .attr("r", function(d) { return d.r ; });
+     });
+
+node.append("text")
+    .attr("dy", ".3em")
+    .style("text-anchor", "middle")
+    .text(function(d) { return d.className.substring(0, d.r / 3); });
+
+node.on("click", function(d){
+  if (d.url){
+    window.open(d.url, "_blank");
+  } 
+  else {
+    alert(d.className);
+  }
+});
+
+// Returns a flattened hierarchy containing all leaf nodes under the root.
+function classes(root) {
+  var classes = [];
+
+  function recurse(name, node) {
+    if (node.children) node.children.forEach(function(child) { recurse(node.name, child); });
+    else classes.push({packageName: name, className: node.name, value: node.size, url: node.url});
+  }
+
+  recurse(null, root);
+  return {children: classes};
+}
+
+d3.select(self.frameElement).style("height", diameter + "px");
+</script>
