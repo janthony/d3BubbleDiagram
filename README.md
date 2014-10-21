@@ -23,6 +23,10 @@ python -m SimpleHTTPServer
 from inside the folder 
 
 * You should be able to access the site at http://localhost:8000
+ 
+### Example
+
+[Here is](http://geoplex.com.au/labs/tech-used-in-product-development/) a sample using an embedded json.
 
 ---
 Credit to: [Mike Bostock](http://bl.ocks.org/mbostock/4063269)
