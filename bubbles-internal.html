@@ -7,6 +7,10 @@ text {
   font: 10px sans-serif;
 }
 
+body {
+	background: #01A752;
+}
+
 </style>
 <body>
   <div id="techBubble">
@@ -88,7 +92,7 @@ var bubbleData = {
 
 var diameter = 660,
     format = d3.format(",d"),
-    color = d3.scale.category20c();
+    color = d3.scale.category20b();
 
 var bubble = d3.layout.pack()
     .sort(null)
